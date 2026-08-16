@@ -1,6 +1,6 @@
 # Versa Note
 
-A simple multi-type note-taking app built with Python and tkinter. Open plain text, markdown, and spreadsheet notes in tabs; edit, transform, and copy them with familiar desktop shortcuts.
+A simple multi-type note-taking app built with Python and tkinter. Open plain text, markdown, spreadsheet, and JSON notes in tabs; edit, transform, and copy them with familiar desktop shortcuts.
 
 ## Requirements
 
@@ -32,10 +32,11 @@ python -m versa_note
 | Plain text | `.txt` | Word-wrapped text editor |
 | Markdown | `.md` | Source editor with syntax coloring (headings, bold, italic, code, links, lists, quotes) — not a rendered preview |
 | Spreadsheet | `.csv` | Simple grid for data entry; not a full spreadsheet engine |
+| JSON | `.json` | Source editor with syntax coloring (keys, strings, numbers, keywords), validity in the status bar, Prettify / Minify |
 
 ### Tabs & session
 
-- **File → New** opens plain text, markdown, or spreadsheet notes in tabs
+- **File → New** opens plain text, markdown, spreadsheet, or JSON notes in tabs
 - Unnamed notes autosave on exit as `New`, `New - 1`, `New - 2`, … (with the right extension)
 - Open tabs are restored next launch via `.versa-note-session.json`
 
@@ -57,6 +58,12 @@ python -m versa_note
 
 Works on text selections and on spreadsheet cell / row / column selections.
 
+**Transform → Prettify / Minify** (JSON tabs only; disabled otherwise)
+
+- Prettify (Ctrl+Shift+F) — indent with 2 spaces
+- Minify — compact single-line JSON
+- Invalid JSON is left unchanged; the status bar shows the parse error
+
 ## Shortcuts
 
 | Shortcut | Action |
@@ -67,6 +74,7 @@ Works on text selections and on spreadsheet cell / row / column selections.
 | Ctrl+Shift+S | Save As |
 | Ctrl+W | Close tab |
 | Ctrl+X / C / V | Cut / Copy / Paste |
+| Ctrl+Shift+F | Prettify JSON (JSON tabs only) |
 
 ## Project layout
 
@@ -81,12 +89,14 @@ versa-note/
 │   ├── app.py              # Main window, menus, file/session logic
 │   ├── constants.py        # Shared constants
 │   ├── transforms.py       # Caps transforms
+│   ├── json_format.py      # Prettify / minify / validate helpers
 │   ├── clipboard.py        # HTML table / clipboard helpers
 │   └── documents/
 │       ├── base.py         # Document base class
 │       ├── plain.py        # Plain text notes
 │       ├── markdown.py     # Markdown source editor
 │       ├── spreadsheet.py  # CSV grid
+│       ├── json_document.py # JSON source editor
 │       └── registry.py     # DOC_TYPES, EXT_TO_TYPE, extension resolution
 ├── README.md
 └── .gitignore
@@ -101,7 +111,12 @@ versa-note/
 
 ## Development
 
-Tests are planned under `tests/` (pytest). No test dependencies are required to run the app.
+```bash
+pip install pytest
+pytest
+```
+
+No third-party packages are required to run the app itself.
 
 ## License
 

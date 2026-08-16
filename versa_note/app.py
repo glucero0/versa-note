@@ -13,6 +13,7 @@ from versa_note.constants import APP_NAME, NEW_STEM, SESSION_FILENAME
 from versa_note.documents import (
     DOC_TYPES,
     Document,
+    JsonDocument,
     NOTE_TYPE_LABELS,
     SUPPORTED_EXTENSIONS,
     resolve_note_type,
@@ -52,6 +53,7 @@ class VersaNoteApp(tk.Tk):
         new_menu.add_command(label="Plain text", accelerator="Ctrl+N", command=lambda: self.new_document("plain"))
         new_menu.add_command(label="Markdown", command=lambda: self.new_document("markdown"))
         new_menu.add_command(label="Spreadsheet", command=lambda: self.new_document("spreadsheet"))
+        new_menu.add_command(label="JSON", command=lambda: self.new_document("json"))
         file_menu.add_cascade(label="New", menu=new_menu)
         file_menu.add_command(label="Open…", accelerator="Ctrl+O", command=self.open_document)
         file_menu.add_separator()
@@ -76,6 +78,19 @@ class VersaNoteApp(tk.Tk):
         caps_menu.add_command(label="Initial Caps", command=lambda: self.apply_caps("initial"))
         caps_menu.add_command(label="Sentence Caps", command=lambda: self.apply_caps("sentence"))
         transform_menu.add_cascade(label="Caps", menu=caps_menu)
+        transform_menu.add_separator()
+        transform_menu.add_command(
+            label="Prettify",
+            accelerator="Ctrl+Shift+F",
+            command=self.prettify_json,
+            state="disabled",
+        )
+        transform_menu.add_command(
+            label="Minify",
+            command=self.minify_json,
+            state="disabled",
+        )
+        self._transform_menu = transform_menu
         menubar.add_cascade(label="Transform", menu=transform_menu)
 
         help_menu = tk.Menu(menubar, tearoff=0)
@@ -89,6 +104,7 @@ class VersaNoteApp(tk.Tk):
         self.bind_all("<Control-s>", lambda e: self.save_document())
         self.bind_all("<Control-S>", lambda e: self.save_document_as())
         self.bind_all("<Control-w>", lambda e: self.close_current_tab())
+        self.bind_all("<Control-F>", lambda e: self.prettify_json())
         # Cut/Copy/Paste are bound on editor widgets (not bind_all) so they
         # run before Tk class defaults and do not paste/cut twice.
 
@@ -152,14 +168,24 @@ class VersaNoteApp(tk.Tk):
     def _set_status(self, message: str) -> None:
         self.status.configure(text=message)
 
+    def _update_json_actions(self) -> None:
+        doc = self.current_document()
+        state = "normal" if isinstance(doc, JsonDocument) else "disabled"
+        self._transform_menu.entryconfigure("Prettify", state=state)
+        self._transform_menu.entryconfigure("Minify", state=state)
+
     def _update_chrome(self) -> None:
+        self._update_json_actions()
         doc = self.current_document()
         if doc:
             self._refresh_tab(doc)
             self.title(f"{doc.display_name()} — {APP_NAME}")
             type_label = NOTE_TYPE_LABELS.get(doc.note_type, doc.note_type)
             path = str(doc.path) if doc.path else f"(unsaved · {doc.base_name()})"
-            self._set_status(f"{type_label}  ·  {path}")
+            if isinstance(doc, JsonDocument):
+                self._set_status(f"{type_label}  ·  {doc.status_validity()}  ·  {path}")
+            else:
+                self._set_status(f"{type_label}  ·  {path}")
         else:
             self.title(APP_NAME)
             self._set_status("Ready")
@@ -173,8 +199,13 @@ class VersaNoteApp(tk.Tk):
             self._refresh_tab(widget)
         self._update_chrome()
 
+    def _on_json_status(self, _event=None) -> None:
+        self._update_chrome()
+
     def _add_document_tab(self, doc: Document, *, select: bool = True) -> None:
         doc.bind("<<DocumentDirty>>", self._on_dirty)
+        if isinstance(doc, JsonDocument):
+            doc.bind("<<JsonStatusChanged>>", self._on_json_status)
         self.notebook.add(doc, text=doc.display_name())
         if select:
             self.notebook.select(doc)
@@ -251,6 +282,28 @@ class VersaNoteApp(tk.Tk):
         self._set_status(f"Applied Caps → {labels.get(kind, kind)}")
         self._update_chrome()
 
+    def prettify_json(self) -> None:
+        doc = self.current_document()
+        if not isinstance(doc, JsonDocument):
+            return
+        if doc.prettify():
+            self._update_chrome()
+            self._set_status("Prettified JSON")
+        else:
+            detail = doc.status_validity().removeprefix("invalid: ")
+            self._set_status(f"Cannot prettify: {detail}")
+
+    def minify_json(self) -> None:
+        doc = self.current_document()
+        if not isinstance(doc, JsonDocument):
+            return
+        if doc.minify():
+            self._update_chrome()
+            self._set_status("Minified JSON")
+        else:
+            detail = doc.status_validity().removeprefix("invalid: ")
+            self._set_status(f"Cannot minify: {detail}")
+
     # ------------------------------------------------------------------
     # File actions
     # ------------------------------------------------------------------
@@ -288,10 +341,11 @@ class VersaNoteApp(tk.Tk):
             parent=self,
             title="Open",
             filetypes=[
-                ("Supported notes", "*.txt *.md *.markdown *.csv"),
+                ("Supported notes", "*.txt *.md *.markdown *.csv *.json"),
                 ("Text files", "*.txt"),
                 ("Markdown files", "*.md *.markdown"),
                 ("CSV spreadsheets", "*.csv"),
+                ("JSON files", "*.json"),
                 ("All files", "*.*"),
             ],
         )
@@ -520,7 +574,7 @@ class VersaNoteApp(tk.Tk):
             "About",
             f"{APP_NAME}\n\n"
             "A simple note-taking app with plain text, markdown\n"
-            "(syntax-colored source), and spreadsheet grid notes.",
+            "(syntax-colored source), JSON, and spreadsheet grid notes.",
             parent=self,
         )
 

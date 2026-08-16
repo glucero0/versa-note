@@ -47,10 +47,12 @@ New.txt
 New.md
 New.csv
 New.markdown
+New.json
 New - *.txt
 New - *.md
 New - *.csv
 New - *.markdown
+New - *.json
 
 # Local sample / scratch notes (optional working copies)
 *.local.*

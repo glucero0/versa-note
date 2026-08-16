@@ -1,6 +1,7 @@
 """Document panes for Versa Note."""
 
 from versa_note.documents.base import Document
+from versa_note.documents.json_document import JsonDocument
 from versa_note.documents.markdown import MarkdownDocument
 from versa_note.documents.plain import PlainTextDocument
 from versa_note.documents.registry import (
@@ -17,6 +18,7 @@ __all__ = [
     "DOC_TYPES",
     "Document",
     "EXT_TO_TYPE",
+    "JsonDocument",
     "MarkdownDocument",
     "NOTE_TYPE_LABELS",
     "PlainTextDocument",
