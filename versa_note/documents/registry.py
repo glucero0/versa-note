@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Type
 
 from versa_note.documents.base import Document
+from versa_note.documents.json_document import JsonDocument
 from versa_note.documents.markdown import MarkdownDocument
 from versa_note.documents.plain import PlainTextDocument
 from versa_note.documents.spreadsheet import SpreadsheetDocument
@@ -14,6 +15,7 @@ DOC_TYPES: dict[str, Type[Document]] = {
     "plain": PlainTextDocument,
     "markdown": MarkdownDocument,
     "spreadsheet": SpreadsheetDocument,
+    "json": JsonDocument,
 }
 
 EXT_TO_TYPE: dict[str, str] = {
@@ -21,6 +23,7 @@ EXT_TO_TYPE: dict[str, str] = {
     ".md": "markdown",
     ".markdown": "markdown",
     ".csv": "spreadsheet",
+    ".json": "json",
 }
 
 SUPPORTED_EXTENSIONS = frozenset(EXT_TO_TYPE.keys())
@@ -29,6 +32,7 @@ NOTE_TYPE_LABELS: dict[str, str] = {
     "plain": "Plain text",
     "markdown": "Markdown",
     "spreadsheet": "Spreadsheet",
+    "json": "JSON",
 }
 
 
