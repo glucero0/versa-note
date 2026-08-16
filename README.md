@@ -44,6 +44,7 @@ python -m versa_note
 
 - **Edit → Cut / Copy / Paste** (Ctrl+X / Ctrl+C / Ctrl+V)
 - **View → Line Numbers** toggles a gutter on plain text, markdown, and JSON editors (spreadsheet tabs already show row numbers)
+- Lower-right status shows format, length, line count, and caret position (e.g. `JSON	Len: 1821	Lines: 160	Ln: 13	Col: 66`)
 - Spreadsheet ranges copy as HTML tables (for Google Docs / Sheets) plus TSV plain text
 - Spreadsheet columns grow as you type; drag column header edges to resize (double-click a sizer to autofit)
 - Right-click a row header, column header, or cell for Insert/Delete Row and Column (above/below, left/right)
@@ -81,6 +82,7 @@ Works on text selections and on spreadsheet cell / row / column selections.
 
 ```
 versa-note/
+├── .github/workflows/tests.yml  # CI: pytest on Windows
 ├── .python-version         # Pinned Python version (3.13.5)
 ├── pyproject.toml          # Project metadata and Python pin
 ├── main.py                 # Entry point (python main.py)
@@ -100,6 +102,7 @@ versa-note/
 │       ├── spreadsheet.py  # CSV grid
 │       ├── json_document.py # JSON source editor
 │       └── registry.py     # DOC_TYPES, EXT_TO_TYPE, extension resolution
+├── tests/                  # pytest suite
 ├── README.md
 └── .gitignore
 ```
@@ -117,6 +120,8 @@ versa-note/
 pip install -e ".[dev]"
 pytest
 ```
+
+CI runs the same suite on Windows (Python 3.13) via [`.github/workflows/tests.yml`](.github/workflows/tests.yml) on pushes and pull requests to `main`.
 
 The suite covers registry contracts, transforms, clipboard/HTML helpers, JSON formatting, document round-trips (tkinter), spreadsheet CSV/matrix helpers, and session path restore. Dialog-driven Save As / Open and live Windows clipboard APIs are not covered yet.
 

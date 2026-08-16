@@ -78,6 +78,13 @@ class Document(ttk.Frame):
     def supports_line_numbers(self) -> bool:
         return False
 
+    def editor_status_text(self) -> str:
+        """Lower-right status: FORMAT\\tLen: n\\tLines: n\\tLn: n\\tCol: n."""
+        return ""
+
+    def bind_caret_status(self, callback) -> None:
+        """Invoke callback when caret/selection metrics may have changed."""
+
     def _shortcut_cut(self, _event=None) -> str:
         self.edit_cut()
         return "break"
@@ -131,3 +138,37 @@ def text_widget_edit_paste(text: tk.Text, doc: Document) -> bool:
     text.insert("insert", clip)
     doc.mark_dirty()
     return True
+
+
+def format_editor_status(*, fmt: str, length: int, lines: int, line: int, column: int) -> str:
+    """Build the lower-right status strip (tab-separated fields)."""
+    return f"{fmt}\tLen: {length}\tLines: {lines}\tLn: {line}\tCol: {column}"
+
+
+def text_widget_editor_status(text: tk.Text, fmt: str) -> str:
+    content = text.get("1.0", "end-1c")
+    length = len(content)
+    lines = int(float(text.index("end-1c")))
+    line_s, col_s = str(text.index("insert")).split(".", 1)
+    # Tk columns are 0-based; show 1-based like common editors
+    return format_editor_status(
+        fmt=fmt,
+        length=length,
+        lines=lines,
+        line=int(line_s),
+        column=int(col_s) + 1,
+    )
+
+
+def bind_text_caret_status(text: tk.Text, callback) -> None:
+    for sequence in (
+        "<KeyRelease>",
+        "<ButtonRelease-1>",
+        "<FocusIn>",
+        "<<Modified>>",
+        "<Control-v>",
+        "<Control-x>",
+        "<Control-z>",
+        "<Control-y>",
+    ):
+        text.bind(sequence, lambda e, cb=callback: cb(), add="+")

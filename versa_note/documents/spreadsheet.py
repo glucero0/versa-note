@@ -28,8 +28,9 @@ from versa_note.constants import (
     HEADER_SEL_BG,
     MAX_COL_WIDTH,
     MIN_COL_WIDTH,
+    STATUS_FORMAT_LABELS,
 )
-from versa_note.documents.base import Document
+from versa_note.documents.base import Document, format_editor_status
 
 
 def column_header_label(col: int) -> str:
@@ -82,6 +83,7 @@ class SpreadsheetDocument(Document):
         self._sel_r2: Optional[int] = None
         self._sel_c2: Optional[int] = None
         self._context_menu = tk.Menu(self, tearoff=0)
+        self._caret_status_callback = None
 
         outer = ttk.Frame(self)
         outer.pack(fill="both", expand=True)
@@ -160,6 +162,7 @@ class SpreadsheetDocument(Document):
     def _on_cell_edit(self, col: int, *_args) -> None:
         self.mark_dirty()
         self._fit_column(col, shrink=False)
+        self._notify_caret_status()
 
     def _start_resize(self, event: tk.Event, col: int) -> None:
         self._resize_col = col
@@ -213,6 +216,7 @@ class SpreadsheetDocument(Document):
     def _set_selection(self, r1: int, c1: int, r2: int, c2: int) -> None:
         self._sel_r1, self._sel_c1, self._sel_r2, self._sel_c2 = r1, c1, r2, c2
         self._refresh_selection_styles()
+        self._notify_caret_status()
 
     def _selected_cells(self) -> list[tuple[int, int]]:
         if self._sel_r1 is None or self._sel_c1 is None or self._sel_r2 is None or self._sel_c2 is None:
@@ -432,6 +436,35 @@ class SpreadsheetDocument(Document):
 
     def _pad_matrix(self, values: list[list[str]], rows: int, cols: int) -> list[list[str]]:
         return pad_matrix(values, rows, cols)
+
+    def editor_status_text(self) -> str:
+        content = self.get_content()
+        length = len(content)
+        if not content:
+            lines = 0
+        else:
+            lines = content.count("\n") + (0 if content.endswith("\n") else 1)
+        bounds = self._selection_bounds()
+        if bounds is None:
+            line, column = 1, 1
+        else:
+            r1, c1, _r2, _c2 = bounds
+            line, column = r1 + 1, c1 + 1
+        return format_editor_status(
+            fmt=STATUS_FORMAT_LABELS[self.note_type],
+            length=length,
+            lines=lines,
+            line=line,
+            column=column,
+        )
+
+    def bind_caret_status(self, callback) -> None:
+        self._caret_status_callback = callback
+
+    def _notify_caret_status(self) -> None:
+        callback = getattr(self, "_caret_status_callback", None)
+        if callback is not None:
+            callback()
 
     def _insert_rows(self, at_index: int, count: int = 1) -> None:
         if count < 1:

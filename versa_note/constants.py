@@ -13,3 +13,11 @@ CELL_BG = "#FFFFFF"
 CELL_SEL_BG = "#CDE4FF"
 HEADER_BG = "#F0F0F0"
 HEADER_SEL_BG = "#B7D4F5"
+
+# Short labels for the lower-right editor status strip
+STATUS_FORMAT_LABELS: dict[str, str] = {
+    "plain": "TXT",
+    "markdown": "MD",
+    "spreadsheet": "CSV",
+    "json": "JSON",
+}
