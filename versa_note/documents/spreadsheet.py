@@ -32,6 +32,34 @@ from versa_note.constants import (
 from versa_note.documents.base import Document
 
 
+def column_header_label(col: int) -> str:
+    """Excel-style column label: 0→A, 25→Z, 26→AA."""
+    name = ""
+    n = col
+    while True:
+        name = chr(ord("A") + (n % 26)) + name
+        n = n // 26 - 1
+        if n < 0:
+            break
+    return name
+
+
+def pad_matrix(values: list[list[str]], rows: int, cols: int) -> list[list[str]]:
+    """Pad or truncate a matrix to exactly rows × cols."""
+    padded: list[list[str]] = []
+    for r in range(rows):
+        if r < len(values):
+            row = list(values[r])
+        else:
+            row = []
+        if len(row) < cols:
+            row.extend([""] * (cols - len(row)))
+        else:
+            row = row[:cols]
+        padded.append(row)
+    return padded
+
+
 class SpreadsheetDocument(Document):
     note_type = "spreadsheet"
     default_extension = ".csv"
@@ -83,15 +111,7 @@ class SpreadsheetDocument(Document):
         self.canvas.itemconfigure(self._window, width=max(event.width, self.grid_frame.winfo_reqwidth()))
 
     def _header_label(self, col: int) -> str:
-        # A, B, C, ... AA style
-        name = ""
-        n = col
-        while True:
-            name = chr(ord("A") + (n % 26)) + name
-            n = n // 26 - 1
-            if n < 0:
-                break
-        return name
+        return column_header_label(col)
 
     def _sync_col_widths(self) -> None:
         widths = list(getattr(self, "col_widths", []))
@@ -411,18 +431,7 @@ class SpreadsheetDocument(Document):
         return min(c1, c2), max(c1, c2)
 
     def _pad_matrix(self, values: list[list[str]], rows: int, cols: int) -> list[list[str]]:
-        padded: list[list[str]] = []
-        for r in range(rows):
-            if r < len(values):
-                row = list(values[r])
-            else:
-                row = []
-            if len(row) < cols:
-                row.extend([""] * (cols - len(row)))
-            else:
-                row = row[:cols]
-            padded.append(row)
-        return padded
+        return pad_matrix(values, rows, cols)
 
     def _insert_rows(self, at_index: int, count: int = 1) -> None:
         if count < 1:

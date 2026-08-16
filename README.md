@@ -114,9 +114,11 @@ versa-note/
 ## Development
 
 ```bash
-pip install pytest
+pip install -e ".[dev]"
 pytest
 ```
+
+The suite covers registry contracts, transforms, clipboard/HTML helpers, JSON formatting, document round-trips (tkinter), spreadsheet CSV/matrix helpers, and session path restore. Dialog-driven Save As / Open and live Windows clipboard APIs are not covered yet.
 
 No third-party packages are required to run the app itself.
 
