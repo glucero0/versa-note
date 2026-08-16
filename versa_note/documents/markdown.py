@@ -8,11 +8,14 @@ from collections.abc import Callable
 from tkinter import ttk
 from typing import Optional
 
+from versa_note.constants import STATUS_FORMAT_LABELS
 from versa_note.documents.base import (
     Document,
+    bind_text_caret_status,
     text_widget_edit_copy,
     text_widget_edit_cut,
     text_widget_edit_paste,
+    text_widget_editor_status,
 )
 from versa_note.line_numbers import LineNumberGutter
 from versa_note.transforms import apply_caps_to_text_widget
@@ -87,6 +90,12 @@ class MarkdownDocument(Document):
 
     def set_line_numbers_visible(self, visible: bool) -> None:
         self.line_numbers.set_visible(visible)
+
+    def editor_status_text(self) -> str:
+        return text_widget_editor_status(self.text, STATUS_FORMAT_LABELS[self.note_type])
+
+    def bind_caret_status(self, callback) -> None:
+        bind_text_caret_status(self.text, callback)
 
     def bind_edit_shortcuts(self) -> None:
         self.text.bind("<Control-x>", self._shortcut_cut)

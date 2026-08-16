@@ -118,8 +118,14 @@ class VersaNoteApp(tk.Tk):
         # run before Tk class defaults and do not paste/cut twice.
 
     def _build_ui(self) -> None:
-        self.status = ttk.Label(self, text="Ready", anchor="w", padding=(8, 4))
-        self.status.pack(side="bottom", fill="x")
+        status_bar = ttk.Frame(self)
+        status_bar.pack(side="bottom", fill="x")
+
+        self.status = ttk.Label(status_bar, text="Ready", anchor="w", padding=(8, 4))
+        self.status.pack(side="left", fill="x", expand=True)
+
+        self.editor_status = ttk.Label(status_bar, text="", anchor="e", padding=(8, 4))
+        self.editor_status.pack(side="right")
 
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="both", expand=True)
@@ -177,6 +183,16 @@ class VersaNoteApp(tk.Tk):
     def _set_status(self, message: str) -> None:
         self.status.configure(text=message)
 
+    def _set_editor_status(self, message: str) -> None:
+        self.editor_status.configure(text=message)
+
+    def _update_editor_status(self, _event=None) -> None:
+        doc = self.current_document()
+        if doc is None:
+            self._set_editor_status("")
+            return
+        self._set_editor_status(doc.editor_status_text())
+
     def _update_json_actions(self) -> None:
         doc = self.current_document()
         state = "normal" if isinstance(doc, JsonDocument) else "disabled"
@@ -195,9 +211,11 @@ class VersaNoteApp(tk.Tk):
                 self._set_status(f"{type_label}  ·  {doc.status_validity()}  ·  {path}")
             else:
                 self._set_status(f"{type_label}  ·  {path}")
+            self._update_editor_status()
         else:
             self.title(APP_NAME)
             self._set_status("Ready")
+            self._set_editor_status("")
 
     def _on_tab_changed(self, _event=None) -> None:
         self._update_chrome()
@@ -215,6 +233,7 @@ class VersaNoteApp(tk.Tk):
         doc.bind("<<DocumentDirty>>", self._on_dirty)
         if isinstance(doc, JsonDocument):
             doc.bind("<<JsonStatusChanged>>", self._on_json_status)
+        doc.bind_caret_status(self._update_editor_status)
         doc.set_line_numbers_visible(bool(self._show_line_numbers.get()))
         self.notebook.add(doc, text=doc.display_name())
         if select:
