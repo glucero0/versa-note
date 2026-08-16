@@ -43,6 +43,7 @@ python -m versa_note
 ### Editing
 
 - **Edit → Cut / Copy / Paste** (Ctrl+X / Ctrl+C / Ctrl+V)
+- **View → Line Numbers** toggles a gutter on plain text, markdown, and JSON editors (spreadsheet tabs already show row numbers)
 - Spreadsheet ranges copy as HTML tables (for Google Docs / Sheets) plus TSV plain text
 - Spreadsheet columns grow as you type; drag column header edges to resize (double-click a sizer to autofit)
 - Right-click a row header, column header, or cell for Insert/Delete Row and Column (above/below, left/right)
@@ -90,6 +91,7 @@ versa-note/
 │   ├── constants.py        # Shared constants
 │   ├── transforms.py       # Caps transforms
 │   ├── json_format.py      # Prettify / minify / validate helpers
+│   ├── line_numbers.py     # Editor line-number gutter
 │   ├── clipboard.py        # HTML table / clipboard helpers
 │   └── documents/
 │       ├── base.py         # Document base class
