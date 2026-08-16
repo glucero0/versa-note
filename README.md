@@ -2,6 +2,8 @@
 
 A simple multi-type note-taking app built with Python and tkinter. Open plain text, markdown, spreadsheet, and JSON notes in tabs; edit, transform, and copy them with familiar desktop shortcuts.
 
+**This project is a work in progress. Use at your own risk.**
+
 ## Requirements
 
 - **Python 3.13.x** (`>=3.13.5,<3.14` in `pyproject.toml`; `.python-version` pins **3.13.5** for local tools)
@@ -126,6 +128,10 @@ CI runs the same suite on Windows (Python 3.13) via [`.github/workflows/tests.ym
 The suite covers registry contracts, transforms, clipboard/HTML helpers, JSON formatting, document round-trips (tkinter), spreadsheet CSV/matrix helpers, and session path restore. Dialog-driven Save As / Open and live Windows clipboard APIs are not covered yet.
 
 No third-party packages are required to run the app itself.
+
+## Credits
+
+Designed by Gary Lucero. Developed with Cursor Grok 4.5.
 
 ## License
 
