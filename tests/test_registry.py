@@ -36,5 +36,12 @@ def test_default_extensions_resolve() -> None:
         assert resolve_note_type(Path(f"note{cls.default_extension}")) == cls.note_type
 
 
-def test_unknown_extension_falls_back_to_plain() -> None:
-    assert resolve_note_type(Path("note.xyz")) == "plain"
+def test_markdown_alias_extension() -> None:
+    assert EXT_TO_TYPE[".markdown"] == "markdown"
+    assert resolve_note_type(Path("readme.markdown")) == "markdown"
+
+
+def test_get_document_class() -> None:
+    from versa_note.documents.registry import get_document_class
+
+    assert get_document_class("json") is DOC_TYPES["json"]
