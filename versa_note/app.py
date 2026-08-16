@@ -29,6 +29,7 @@ class VersaNoteApp(tk.Tk):
         self.minsize(640, 400)
 
         self._save_dir = Path.cwd()
+        self._show_line_numbers = tk.BooleanVar(value=True)
 
         self._build_style()
         self._build_menu()
@@ -92,6 +93,14 @@ class VersaNoteApp(tk.Tk):
         )
         self._transform_menu = transform_menu
         menubar.add_cascade(label="Transform", menu=transform_menu)
+
+        view_menu = tk.Menu(menubar, tearoff=0)
+        view_menu.add_checkbutton(
+            label="Line Numbers",
+            variable=self._show_line_numbers,
+            command=self._toggle_line_numbers,
+        )
+        menubar.add_cascade(label="View", menu=view_menu)
 
         help_menu = tk.Menu(menubar, tearoff=0)
         help_menu.add_command(label="About", command=self._about)
@@ -206,10 +215,16 @@ class VersaNoteApp(tk.Tk):
         doc.bind("<<DocumentDirty>>", self._on_dirty)
         if isinstance(doc, JsonDocument):
             doc.bind("<<JsonStatusChanged>>", self._on_json_status)
+        doc.set_line_numbers_visible(bool(self._show_line_numbers.get()))
         self.notebook.add(doc, text=doc.display_name())
         if select:
             self.notebook.select(doc)
         self._update_chrome()
+
+    def _toggle_line_numbers(self) -> None:
+        visible = bool(self._show_line_numbers.get())
+        for doc in self._all_documents():
+            doc.set_line_numbers_visible(visible)
 
     def _find_tab_for_path(self, path: Path) -> Optional[Document]:
         try:

@@ -15,6 +15,7 @@ from versa_note.documents.base import (
     text_widget_edit_paste,
 )
 from versa_note.json_format import json_error_message, minify_json, prettify_json
+from versa_note.line_numbers import LineNumberGutter
 from versa_note.transforms import apply_caps_to_text_widget
 
 
@@ -39,7 +40,7 @@ class JsonDocument(Document):
     _KEY = re.compile(r'("(?:\\.|[^"\\])*")\s*:')
 
     def _build(self) -> None:
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
         self.text = tk.Text(
@@ -56,7 +57,6 @@ class JsonDocument(Document):
             insertbackground="#1F2328",
         )
         yscroll = ttk.Scrollbar(self, orient="vertical", command=self.text.yview)
-        self.text.configure(yscrollcommand=yscroll.set)
 
         for tag, style in self.TAG_STYLES.items():
             self.text.tag_configure(tag, **style)
@@ -64,8 +64,11 @@ class JsonDocument(Document):
         self.text.tag_raise("key")
         self.text.tag_raise("sel")
 
-        self.text.grid(row=0, column=0, sticky="nsew")
-        yscroll.grid(row=0, column=1, sticky="ns")
+        self.line_numbers = LineNumberGutter(self, self.text)
+        self.line_numbers.grid(row=0, column=0, sticky="ns")
+        self.text.grid(row=0, column=1, sticky="nsew")
+        yscroll.grid(row=0, column=2, sticky="ns")
+        self.line_numbers.attach(yscroll=yscroll)
 
         self.text.bind("<<Modified>>", self._on_modified)
         self.text.bind("<KeyRelease>", self._schedule_highlight)
@@ -73,6 +76,12 @@ class JsonDocument(Document):
         self._parse_error: Optional[str] = None
         self._parsed = False
         self.bind_edit_shortcuts()
+
+    def supports_line_numbers(self) -> bool:
+        return True
+
+    def set_line_numbers_visible(self, visible: bool) -> None:
+        self.line_numbers.set_visible(visible)
 
     def bind_edit_shortcuts(self) -> None:
         self.text.bind("<Control-x>", self._shortcut_cut)
@@ -124,6 +133,7 @@ class JsonDocument(Document):
 
         self._parse_error = json_error_message(content)
         self._parsed = True
+        self.line_numbers.redraw()
         self.event_generate("<<JsonStatusChanged>>", when="tail")
 
     def status_validity(self) -> str:

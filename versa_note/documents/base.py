@@ -72,6 +72,12 @@ class Document(ttk.Frame):
     def bind_edit_shortcuts(self) -> None:
         """Bind Ctrl+X/C/V on editor widgets so they run before class defaults."""
 
+    def set_line_numbers_visible(self, visible: bool) -> None:
+        """Show or hide line numbers when supported. Default: no-op."""
+
+    def supports_line_numbers(self) -> bool:
+        return False
+
     def _shortcut_cut(self, _event=None) -> str:
         self.edit_cut()
         return "break"
