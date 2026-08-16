@@ -3,7 +3,7 @@ name = "versa-note"
 version = "0.1.0"
 description = "Simple multi-type note-taking application"
 readme = "README.md"
-requires-python = "==3.13.5"
+requires-python = ">=3.13.5,<3.14"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

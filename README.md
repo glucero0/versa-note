@@ -4,12 +4,12 @@ A simple multi-type note-taking app built with Python and tkinter. Open plain te
 
 ## Requirements
 
-- **Python 3.13.5** (pinned in `.python-version` and `pyproject.toml`)
+- **Python 3.13.x** (`>=3.13.5,<3.14` in `pyproject.toml`; `.python-version` pins **3.13.5** for local tools)
 - tkinter (included with most Python installs)
 
 No third-party packages are required to run the app.
 
-If you use [pyenv](https://github.com/pyenv/pyenv) or [uv](https://github.com/astral-sh/uv), run `pyenv install` or `uv python install` from the repo root to pick up the pinned version automatically.
+If you use [pyenv](https://github.com/pyenv/pyenv) or [uv](https://github.com/astral-sh/uv), run `pyenv install` or `uv python install` from the repo root to pick up the version in `.python-version`.
 
 ## Run
 
